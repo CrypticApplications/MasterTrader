@@ -38,8 +38,13 @@ static const int64_t MIN_TX_FEE = 1000;
 static const int64_t MIN_RELAY_TX_FEE = MIN_TX_FEE;
 static const int64_t MAX_MONEY = 16500000 * COIN;
 static const int64_t COIN_YEAR_REWARD = 10 * CENT; // 10% per year
+static const int64_t COIN_YEAR_REWARD_INCREASE = 10 * 12 * CENT; // 120% per year
 static const int64_t MAX_MINT_PROOF_OF_STAKE = 0.10 * COIN;	// 10% annual interest
+static const int64_t MAX_MINT_PROOF_OF_STAKE_INCREASE = 0.10 * 12 * COIN;	// 10% monthly (120% annual interest)
 static const int MODIFIER_INTERVAL_SWITCH = 3000;
+static const int POS_BLOCK_BEFORE_INCREASE = 12500;
+static const int POS_BLOCK_REWARD_INCREASE = 12500;
+static const unsigned int MIN_STAKE_AGE_SWITCH_TIME = 1425740400; 
 
 inline bool MoneyRange(int64_t nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
@@ -64,6 +69,10 @@ extern std::map<uint256, CBlockIndex*> mapBlockIndex;
 extern std::set<std::pair<COutPoint, unsigned int> > setStakeSeen;
 extern CBlockIndex* pindexGenesisBlock;
 extern unsigned int nStakeMinAge;
+extern unsigned int nStakeMinAgeV2;
+unsigned int GetStakeMinAge(unsigned int nTime);
+unsigned int GetStakeMaxAge(unsigned int nTime);
+extern unsigned int nStakeMaxAge;
 extern unsigned int nNodeLifespan;
 extern int nCoinbaseMaturity;
 extern int nBestHeight;
@@ -115,7 +124,7 @@ bool LoadExternalBlockFile(FILE* fileIn);
 bool CheckProofOfWork(uint256 hash, unsigned int nBits);
 unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfStake);
 int64_t GetProofOfWorkReward(int64_t nFees);
-int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees);
+int64_t GetProofOfStakeReward(const CBlockIndex* pindex, int64_t nCoinAge, int64_t nFees);
 unsigned int ComputeMinWork(unsigned int nBase, int64_t nTime);
 unsigned int ComputeMinStake(unsigned int nBase, int64_t nTime, unsigned int nBlockTime);
 int GetNumBlocksOfPeers();

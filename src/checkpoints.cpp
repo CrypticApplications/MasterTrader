@@ -25,7 +25,12 @@ namespace Checkpoints
     static MapCheckpoints mapCheckpoints =
         boost::assign::map_list_of
         ( 0,      hashGenesisBlock )
-		
+		( 5000, uint256("0x000000000080340fd3b85612300951ebc4e82f15b33c4771e527d16512a564c8") )
+		( 10000, uint256("0x000000000563ea760b0d07b5a92897f17327ccb9b2775744cc6083e6d1e72e15") )
+		( 10100, uint256("0x000000000df95dea98735c042c7787715842f5c3df9486ed8dd0f3bf1355d5de") )
+		( 10101, uint256("0x9bf29dbf40dd1f22885f8e6ca00519a483f122ebad171a52f9b2446d62086cd3") )
+		( 10601, uint256("0x7f4555de8679175ff91c954b5cd4a78d89615de5361d564e98a8e8629ad8330b") )
+		( 10744, uint256("0xa7eeb5965c4a6247cf092c3c4bea38c0274c48c905711183e525b7d5cf2f2f6a") )
     ;
 
     // TestNet has no checkpoints
@@ -336,14 +341,16 @@ namespace Checkpoints
     }
 
     // Is the sync-checkpoint outside maturity window?
-    bool IsMatureSyncCheckpoint()
+    bool IsMatureSyncCheckpoint(unsigned int nTime)
     {
         LOCK(cs_hashSyncCheckpoint);
         // sync-checkpoint should always be accepted block
         assert(mapBlockIndex.count(hashSyncCheckpoint));
         const CBlockIndex* pindexSync = mapBlockIndex[hashSyncCheckpoint];
-        return (nBestHeight >= pindexSync->nHeight + nCoinbaseMaturity ||
-                pindexSync->GetBlockTime() + nStakeMinAge < GetAdjustedTime());
+		if (nTime < MIN_STAKE_AGE_SWITCH_TIME)
+			return (nBestHeight >= pindexSync->nHeight + nCoinbaseMaturity || pindexSync->GetBlockTime() + nStakeMinAge < GetAdjustedTime());
+		else
+			return (nBestHeight >= pindexSync->nHeight + nCoinbaseMaturity || pindexSync->GetBlockTime() + nStakeMinAgeV2 < GetAdjustedTime());
     }
 }
 
